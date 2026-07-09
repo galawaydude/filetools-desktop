@@ -3,6 +3,9 @@ package pdf_test
 import (
 	"context"
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,6 +15,27 @@ import (
 
 	"github.com/galawaydude/filetools-desktop/internal/tool"
 )
+
+// makePNG writes a small solid-colour PNG and returns its path.
+func makePNG(t *testing.T, dir, name string, c color.Color) string {
+	t.Helper()
+	img := image.NewRGBA(image.Rect(0, 0, 64, 48))
+	for y := 0; y < 48; y++ {
+		for x := 0; x < 64; x++ {
+			img.Set(x, y, c)
+		}
+	}
+	path := filepath.Join(dir, name)
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("makePNG: %v", err)
+	}
+	defer f.Close()
+	if err := png.Encode(f, img); err != nil {
+		t.Fatalf("makePNG encode: %v", err)
+	}
+	return path
+}
 
 // makePDF writes a PDF with the given number of pages and returns its path.
 func makePDF(t *testing.T, dir, name string, pages int) string {
@@ -142,6 +166,43 @@ func TestResize(t *testing.T) {
 	res := run(t, "pdf.resize", tool.Request{Inputs: []string{src}, OutDir: out, Options: tool.Options{"target": "A5"}})
 	if _, err := os.Stat(res.Outputs[0]); err != nil {
 		t.Fatalf("resize output missing: %v", err)
+	}
+}
+
+func TestImagesToPDF(t *testing.T) {
+	dir := t.TempDir()
+	a := makePNG(t, dir, "a.png", color.RGBA{200, 30, 30, 255})
+	b := makePNG(t, dir, "b.png", color.RGBA{30, 30, 200, 255})
+	out := t.TempDir()
+	res := run(t, "pdf.imagestopdf", tool.Request{Inputs: []string{a, b}, OutDir: out})
+	if got := pages(t, res.Outputs[0]); got != 2 {
+		t.Fatalf("images->pdf pages = %d, want 2", got)
+	}
+}
+
+func TestExtractImages(t *testing.T) {
+	dir := t.TempDir()
+	img := makePNG(t, dir, "a.png", color.RGBA{10, 200, 10, 255})
+	built := t.TempDir()
+	src := run(t, "pdf.imagestopdf", tool.Request{Inputs: []string{img}, OutDir: built}).Outputs[0]
+
+	out := t.TempDir()
+	res := run(t, "pdf.extractimages", tool.Request{Inputs: []string{src}, OutDir: out})
+	if len(res.Outputs) == 0 {
+		t.Fatal("expected at least one extracted image")
+	}
+}
+
+func TestExtractText(t *testing.T) {
+	dir := t.TempDir()
+	src := makePDF(t, dir, "src.pdf", 1)
+	out := t.TempDir()
+	res := run(t, "pdf.extracttext", tool.Request{Inputs: []string{src}, OutDir: out})
+	if len(res.Outputs) != 1 {
+		t.Fatalf("want 1 text file, got %d", len(res.Outputs))
+	}
+	if _, err := os.Stat(res.Outputs[0]); err != nil {
+		t.Fatalf("text output missing: %v", err)
 	}
 }
 

@@ -3,9 +3,6 @@ package pdf
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
-	"sort"
 
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 
@@ -51,7 +48,7 @@ func init() {
 			if err := api.SplitFile(in, tmp, span, nil); err != nil {
 				return tool.Result{}, fmt.Errorf("could not split this PDF: %w", err)
 			}
-			outputs, err := moveAllPDFs(tmp, req.OutDir, p)
+			outputs, err := moveAll(tmp, req.OutDir, []string{".pdf"}, p, 0.2, 0.9)
 			if err != nil {
 				return tool.Result{}, err
 			}
@@ -59,28 +56,4 @@ func init() {
 			return tool.Result{Outputs: outputs, Message: fmt.Sprintf("Created %d files.", len(outputs))}, nil
 		},
 	}))
-}
-
-func moveAllPDFs(fromDir, toDir string, p tool.Progress) ([]string, error) {
-	entries, err := os.ReadDir(fromDir)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, e := range entries {
-		if !e.IsDir() && filepath.Ext(e.Name()) == ".pdf" {
-			names = append(names, e.Name())
-		}
-	}
-	sort.Strings(names)
-	var outputs []string
-	for i, name := range names {
-		dst, err := moveInto(filepath.Join(fromDir, name), toDir)
-		if err != nil {
-			return nil, err
-		}
-		outputs = append(outputs, dst)
-		p.Update(0.2+0.7*float64(i+1)/float64(len(names)), "Saving files…")
-	}
-	return outputs, nil
 }

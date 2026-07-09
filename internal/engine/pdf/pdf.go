@@ -8,10 +8,13 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 
 	"github.com/galawaydude/filetools-desktop/internal/platform"
+	"github.com/galawaydude/filetools-desktop/internal/tool"
 )
 
 func init() {
@@ -68,6 +71,47 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return out.Close()
+}
+
+// moveAll moves every file in fromDir into toDir under non-colliding names.
+// If exts is non-empty, only files with those extensions (lower-case, dotted)
+// are moved. Progress is reported across the fromLo..fromHi fraction band.
+func moveAll(fromDir, toDir string, exts []string, p tool.Progress, fromLo, fromHi float64) ([]string, error) {
+	entries, err := os.ReadDir(fromDir)
+	if err != nil {
+		return nil, err
+	}
+	keep := func(name string) bool {
+		if len(exts) == 0 {
+			return true
+		}
+		e := strings.ToLower(filepath.Ext(name))
+		for _, want := range exts {
+			if e == want {
+				return true
+			}
+		}
+		return false
+	}
+	var names []string
+	for _, e := range entries {
+		if !e.IsDir() && keep(e.Name()) {
+			names = append(names, e.Name())
+		}
+	}
+	sort.Strings(names)
+	var outputs []string
+	for i, name := range names {
+		dst, err := moveInto(filepath.Join(fromDir, name), toDir)
+		if err != nil {
+			return nil, err
+		}
+		outputs = append(outputs, dst)
+		if p != nil && len(names) > 0 {
+			p.Update(fromLo+(fromHi-fromLo)*float64(i+1)/float64(len(names)), "Saving files…")
+		}
+	}
+	return outputs, nil
 }
 
 // cancelled reports whether ctx is done, mapping to its error.
