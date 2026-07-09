@@ -3,6 +3,11 @@
 /build/out/
 *.exe
 *.app/
+*.dmg
+/dmg/
+/ft-arm64
+/ft-amd64
+/ft-universal
 /FileTools
 /filetools
 /filetools-desktop

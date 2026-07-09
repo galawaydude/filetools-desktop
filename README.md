@@ -16,15 +16,31 @@ No terminal, no setup, nothing to configure.
   files, missing output folders and very large files all produce a plain-language
   message instead of a crash.
 
-## Install on Windows
+## Install
 
-1. Download **`FileToolsSetup.exe`** from the
-   [Releases page](https://github.com/galawaydude/filetools-desktop/releases/latest).
+Grab the latest build from the
+[Releases page](https://github.com/galawaydude/filetools-desktop/releases/latest).
+
+**Windows**
+1. Download **`FileToolsSetup.exe`**.
 2. Run it and follow the short wizard.
 3. Launch **File Tools** from the Start Menu or Desktop.
 
+**macOS** (universal — Intel and Apple Silicon)
+1. Download **`FileTools.dmg`** and open it.
+2. Drag **File Tools** into the **Applications** folder.
+3. The app isn't signed with an Apple Developer account, so the first time you
+   open it, **right-click the app → Open → Open** (a normal double-click will be
+   blocked by Gatekeeper). You only need to do this once.
+   - If macOS still refuses, run once in Terminal:
+     `xattr -cr /Applications/FileTools.app`
+
 No dependencies are required for the core tools. (Word ↔ PDF is optional — see
 [Limitations](#limitations).)
+
+> **Note:** the app renders with OpenGL, so it may not open inside a Remote
+> Desktop session or a virtual machine that lacks GPU acceleration. Use a normal
+> desktop session.
 
 ## What it does
 
@@ -73,24 +89,28 @@ go run ./cmd/filetools     # run the app
 go test ./...              # run the tests
 ```
 
-### Build the Windows installer
+### Build the installers locally
 
-The installer is normally produced by CI (below), but you can build it locally on
-a Windows machine with Go, MinGW and [NSIS](https://nsis.sourceforge.io/):
-
+**Windows** (needs Go, MinGW and [NSIS](https://nsis.sourceforge.io/)):
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1
 # -> build\FileToolsSetup.exe
 ```
 
+**macOS** (needs Go and the Xcode command line tools):
+```sh
+./scripts/build-macos.sh
+# -> FileTools.app and FileTools.dmg (universal)
+```
+
 ### How releases are built
 
-Pushing a version tag (e.g. `v0.1.0`) triggers
-[.github/workflows/release.yml](.github/workflows/release.yml), which on a Windows
-runner runs the tests, builds a no-console GUI executable, wraps it with the app
-icon via `fyne package`, builds `FileToolsSetup.exe` with NSIS, and attaches it to
-the GitHub Release. You can also run the workflow manually from the Actions tab to
-get the installer as a build artifact.
+Pushing a version tag (e.g. `v0.3.0`) triggers
+[.github/workflows/release.yml](.github/workflows/release.yml). A Windows runner
+builds `FileToolsSetup.exe` (via `fyne package` + NSIS) and a macOS runner builds
+a universal `FileTools.dmg`; both are attached to the GitHub Release. You can also
+run the workflow manually from the Actions tab to get the installers as build
+artifacts.
 
 ## How it's built
 
