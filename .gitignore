@@ -1,0 +1,28 @@
+# Build output (anchored to repo root so cmd/filetools/ source is NOT ignored)
+/dist/
+/build/out/
+*.exe
+*.app/
+/FileTools
+/filetools
+/filetools-desktop
+
+# Go
+*.test
+*.out
+/vendor/
+
+# Fyne packaging artefacts
+fyne-cross/
+*.syso
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Scratch
+/tmp/
+/testdata/output/
