@@ -1,25 +1,12 @@
-# Build output (anchored to repo root so cmd/filetools/ source is NOT ignored)
+# Rust build output
+/target/
+
+# Packaging output
 /dist/
-/build/out/
-*.exe
-*.app/
 *.dmg
-/dmg/
-/ft-arm64
-/ft-amd64
-/ft-universal
-/FileTools
-/filetools
-/filetools-desktop
-
-# Go
-*.test
-*.out
-/vendor/
-
-# Fyne packaging artefacts
-fyne-cross/
-*.syso
+*.exe
+*.AppImage
+*.app/
 
 # OS / editor cruft
 .DS_Store
@@ -27,7 +14,3 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
-
-# Scratch
-/tmp/
-/testdata/output/

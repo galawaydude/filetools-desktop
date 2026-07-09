@@ -1,0 +1,21 @@
+[package]
+name = "filetools"
+description = "Simple, offline file conversion — PDF, image and document tools."
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+anyhow = "1"
+# gpui/gpui_platform must use the SAME source spec as gpui-component's own
+# transitive dependency (git, no rev) so Cargo unifies them into a single crate;
+# a rev pin here would create a second, incompatible copy of gpui. runtime_shaders
+# compiles Metal shaders at runtime, avoiding the Xcode-only `metal` build tool.
+# Exact revisions are frozen in the committed Cargo.lock for reproducibility.
+gpui = { git = "https://github.com/zed-industries/zed" }
+gpui_platform = { git = "https://github.com/zed-industries/zed", features = ["font-kit", "runtime_shaders"] }
+gpui-component = { git = "https://github.com/longbridge/gpui-component", rev = "258791447ceb14888012d3dfabb6510524d3b53e" }
+
+[patch.crates-io]
+# Required by the gpui dependency tree (matches gpui-component's setup).
+psm = { git = "https://github.com/rust-lang/stacker", branch = "master" }

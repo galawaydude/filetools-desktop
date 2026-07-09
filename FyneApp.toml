@@ -1,8 +1,0 @@
-Website = "https://github.com/galawaydude/filetools-desktop"
-
-[Details]
-Icon = "build/appicon.png"
-Name = "FileTools"
-ID = "ai.filetools.desktop"
-Version = "0.3.0"
-Build = 1
