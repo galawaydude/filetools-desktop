@@ -115,10 +115,18 @@ jobs:
         run: |
           fyne package --os darwin --executable ft-universal --name FileTools --icon build/appicon.png --app-id ai.filetools.desktop --release
           test -d FileTools.app || { echo "FileTools.app was not produced"; exit 1; }
+          # Free disk before imaging (the two-arch build cache is large).
+          rm -f ft-arm64 ft-amd64 ft-universal
+          go clean -cache || true
+          df -h /
           mkdir -p dmg/root
           cp -R FileTools.app dmg/root/
           ln -s /Applications dmg/root/Applications
-          hdiutil create -volname "File Tools" -srcfolder dmg/root -ov -format UDZO FileTools.dmg
+          # Create a fixed-size read/write image, then compress it — more robust
+          # than letting hdiutil auto-size the compressed image.
+          hdiutil create -srcfolder dmg/root -volname "File Tools" -fs HFS+ -format UDRW -size 400m rw.dmg
+          hdiutil convert rw.dmg -format UDZO -o FileTools.dmg
+          rm -f rw.dmg
           test -f FileTools.dmg || { echo "DMG was not produced"; exit 1; }
 
       - name: Upload DMG artifact
