@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
@@ -40,13 +41,8 @@ type toolView struct {
 func (u *UI) showTool(t tool.Tool) {
 	v := &toolView{ui: u, t: t, win: u.win, multi: t.InputKind() == tool.InputMultiFile}
 
-	back := widget.NewButtonWithIcon("Back", theme.NavigateBackIcon(), func() { u.showCategory(t.Category()) })
-	back.Importance = widget.LowImportance
-	title := widget.NewLabelWithStyle(t.Name(), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	title.SizeName = theme.SizeNameHeadingText
-	desc := widget.NewLabel(t.Description())
-	desc.Wrapping = fyne.TextWrapWord
-	header := container.NewVBox(container.NewHBox(back), title, desc, widget.NewSeparator())
+	header := screenHeader(toolIcon(t), categoryColor(t.Category()), t.Name(), t.Description(),
+		func() { u.showCategory(t.Category()) })
 
 	form := container.NewVBox(
 		v.buildFilesSection(),
@@ -56,7 +52,7 @@ func (u *UI) showTool(t tool.Tool) {
 
 	v.bottom = container.NewStack(v.runButton())
 
-	content := container.NewBorder(header, container.NewVBox(widget.NewSeparator(), v.bottom), nil, nil,
+	content := container.NewBorder(header, container.NewVBox(widget.NewSeparator(), container.NewPadded(v.bottom)), nil, nil,
 		container.NewVScroll(container.NewPadded(form)))
 	u.setContent(container.NewPadded(content))
 }
@@ -102,9 +98,7 @@ func (v *toolView) addFile() {
 func (v *toolView) refreshFiles() {
 	v.filesBox.Objects = v.filesBox.Objects[:0]
 	if len(v.inputs) == 0 {
-		hint := widget.NewLabel("No files chosen yet.")
-		hint.TextStyle = fyne.TextStyle{Italic: true}
-		v.filesBox.Add(hint)
+		v.filesBox.Add(mutedText("No files chosen yet."))
 	}
 	for i := range v.inputs {
 		v.filesBox.Add(v.fileRow(i))
@@ -325,8 +319,17 @@ func (v *toolView) setBottom(o fyne.CanvasObject) {
 // ---- shared helpers ----
 
 func sectionCard(title string, body fyne.CanvasObject) fyne.CanvasObject {
-	head := widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	return container.NewVBox(head, body, widget.NewLabel(""))
+	bg := canvas.NewRectangle(themeColor(colorCard))
+	bg.CornerRadius = 12
+	bg.StrokeColor = themeColor(theme.ColorNameInputBorder)
+	bg.StrokeWidth = 1
+
+	head := canvas.NewText(title, themeColor(theme.ColorNameForeground))
+	head.TextStyle = fyne.TextStyle{Bold: true}
+	head.TextSize = 15
+
+	inner := container.NewVBox(head, widget.NewSeparator(), body)
+	return container.NewStack(bg, container.NewPadded(inner))
 }
 
 func numericValidator(allowDecimal bool) fyne.StringValidator {
