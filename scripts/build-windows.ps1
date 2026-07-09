@@ -1,0 +1,33 @@
+# Build the File Tools Windows installer locally (run on Windows in the repo root):
+#   powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1
+#
+# Requirements: Go, a C compiler (MinGW gcc), and NSIS.
+# The script installs the Fyne tool and NSIS (via Chocolatey) if missing.
+
+$ErrorActionPreference = "Stop"
+
+if (-not (Get-Command gcc -ErrorAction SilentlyContinue)) {
+    Write-Error "A C compiler (gcc) is required. Install MinGW-w64, e.g. 'choco install mingw -y'."
+}
+
+Write-Host "Installing Fyne packaging tool..."
+go install fyne.io/fyne/v2/cmd/fyne@latest
+$env:PATH = "$(go env GOPATH)\bin;$env:PATH"
+
+Write-Host "Packaging FileTools.exe..."
+$env:CGO_ENABLED = "1"
+go build -ldflags "-H windowsgui" -o build/FileTools-raw.exe ./cmd/filetools
+fyne package --os windows --executable build/FileTools-raw.exe --name FileTools --icon build/appicon.png --release
+if (-not (Test-Path "FileTools.exe")) { throw "FileTools.exe was not produced" }
+
+$makensis = "C:\Program Files (x86)\NSIS\makensis.exe"
+if (-not (Test-Path $makensis)) {
+    Write-Host "Installing NSIS..."
+    choco install nsis -y
+}
+
+Write-Host "Building installer..."
+& $makensis build\installer.nsi
+if (-not (Test-Path "build\FileToolsSetup.exe")) { throw "installer was not produced" }
+
+Write-Host "Done. Installer at build\FileToolsSetup.exe"
