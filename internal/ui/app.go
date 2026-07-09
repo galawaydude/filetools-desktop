@@ -5,7 +5,6 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/theme"
 
 	"github.com/galawaydude/filetools-desktop/internal/tool"
 )
@@ -23,10 +22,12 @@ type UI struct {
 // New creates the application shell backed by the given registry.
 func New(registry *tool.Registry) *UI {
 	a := app.NewWithID("ai.filetools.desktop")
-	a.Settings().SetTheme(theme.DefaultTheme())
+	a.Settings().SetTheme(newAppTheme())
+	a.SetIcon(appIcon)
 
 	w := a.NewWindow(AppName)
-	w.Resize(fyne.NewSize(880, 620))
+	w.SetIcon(appIcon)
+	w.Resize(fyne.NewSize(900, 640))
 	w.CenterOnScreen()
 
 	return &UI{fyne: a, win: w, registry: registry}
