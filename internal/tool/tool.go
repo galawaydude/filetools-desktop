@@ -93,12 +93,12 @@ var NopProgress Progress = ProgressFunc(func(float64, string) {})
 //   - Write every output into Request.OutDir as a NEW file.
 //   - Return promptly with ctx.Err() when the context is cancelled.
 type Tool interface {
-	ID() string             // stable unique id, e.g. "pdf.merge"
-	Name() string           // plain-language name, e.g. "Merge PDFs"
-	Category() Category     // home card it belongs to
-	Description() string    // one/two sentence plain-language description
-	InputKind() InputKind   // single vs multiple files
-	Extensions() []string   // accepted input extensions, lower-case with dot
-	Options() []Option      // user-adjustable settings (may be empty)
+	ID() string           // stable unique id, e.g. "pdf.merge"
+	Name() string         // plain-language name, e.g. "Merge PDFs"
+	Category() Category   // home card it belongs to
+	Description() string  // one/two sentence plain-language description
+	InputKind() InputKind // single vs multiple files
+	Extensions() []string // accepted input extensions, lower-case with dot
+	Options() []Option    // user-adjustable settings (may be empty)
 	Run(ctx context.Context, req Request, p Progress) (Result, error)
 }

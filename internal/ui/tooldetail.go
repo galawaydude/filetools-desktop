@@ -21,19 +21,19 @@ import (
 
 // toolView holds the state of a single tool's screen.
 type toolView struct {
-	ui   *UI
-	t    tool.Tool
-	win  fyne.Window
+	ui    *UI
+	t     tool.Tool
+	win   fyne.Window
 	multi bool
 
 	inputs  []string
 	outDir  string
 	getOpts []func() (string, string) // returns (key, value)
 
-	filesBox  *fyne.Container
-	outLabel  *widget.Label
-	bottom    *fyne.Container
-	cancel    context.CancelFunc
+	filesBox *fyne.Container
+	outLabel *widget.Label
+	bottom   *fyne.Container
+	cancel   context.CancelFunc
 }
 
 // showTool renders the select -> options -> output -> run flow for a tool.

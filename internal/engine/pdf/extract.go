@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pdfcpu/pdfcpu/pkg/api"
 	extractpdf "github.com/ledongthuc/pdf"
+	"github.com/pdfcpu/pdfcpu/pkg/api"
 
 	"github.com/galawaydude/filetools-desktop/internal/platform"
 	"github.com/galawaydude/filetools-desktop/internal/tool"
