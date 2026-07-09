@@ -12,8 +12,8 @@ import (
 	"github.com/galawaydude/filetools-desktop/internal/ui"
 	// Engine packages register their tools via init():
 	_ "github.com/galawaydude/filetools-desktop/internal/engine/doc"
+	_ "github.com/galawaydude/filetools-desktop/internal/engine/image"
 	_ "github.com/galawaydude/filetools-desktop/internal/engine/pdf"
-	// _ "github.com/galawaydude/filetools-desktop/internal/engine/image"
 )
 
 func main() {
