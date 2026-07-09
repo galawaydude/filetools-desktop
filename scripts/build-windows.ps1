@@ -18,7 +18,10 @@ Write-Host "Packaging FileTools.exe..."
 $env:CGO_ENABLED = "1"
 $icon = Join-Path (Get-Location) "build\appicon.png"
 fyne package --os windows --src ./cmd/filetools --icon "$icon" --name FileTools --app-id ai.filetools.desktop --release
-if (-not (Test-Path "FileTools.exe")) { throw "FileTools.exe was not produced" }
+$exe = Get-ChildItem -Recurse -Filter FileTools.exe | Select-Object -First 1
+if (-not $exe) { throw "FileTools.exe was not produced" }
+$dest = Join-Path (Get-Location) "FileTools.exe"
+if ($exe.FullName -ne $dest) { Move-Item -Force $exe.FullName $dest }
 
 $makensis = "C:\Program Files (x86)\NSIS\makensis.exe"
 if (-not (Test-Path $makensis)) {

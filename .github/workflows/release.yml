@@ -52,7 +52,13 @@ jobs:
           # pass an absolute path. Output FileTools.exe lands in the repo root.
           $icon = Join-Path (Get-Location) "build\appicon.png"
           fyne package --os windows --src ./cmd/filetools --icon "$icon" --name FileTools --app-id ai.filetools.desktop --release
-          if (-not (Test-Path "FileTools.exe")) { throw "FileTools.exe was not produced" }
+          Write-Host "=== .exe files after packaging ==="
+          Get-ChildItem -Recurse -Filter *.exe | ForEach-Object { Write-Host $_.FullName }
+          $exe = Get-ChildItem -Recurse -Filter FileTools.exe | Select-Object -First 1
+          if (-not $exe) { throw "FileTools.exe was not produced" }
+          $dest = Join-Path (Get-Location) "FileTools.exe"
+          if ($exe.FullName -ne $dest) { Move-Item -Force $exe.FullName $dest }
+          Write-Host "Using installer input: $dest"
 
       - name: Build installer with NSIS
         shell: pwsh
