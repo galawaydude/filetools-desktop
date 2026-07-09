@@ -47,9 +47,11 @@ jobs:
         env:
           CGO_ENABLED: "1"
         run: |
-          # Build a GUI binary (no console window), then wrap it with icon + metadata.
-          go build -ldflags "-H windowsgui" -o build/FileTools-raw.exe ./cmd/filetools
-          fyne package --os windows --executable build/FileTools-raw.exe --name FileTools --icon build/appicon.png --release
+          # fyne builds the command package for Windows (GUI subsystem, no console
+          # window) and embeds the icon. --icon is resolved relative to --src, so
+          # pass an absolute path. Output FileTools.exe lands in the repo root.
+          $icon = Join-Path (Get-Location) "build\appicon.png"
+          fyne package --os windows --src ./cmd/filetools --icon "$icon" --name FileTools --app-id ai.filetools.desktop --release
           if (-not (Test-Path "FileTools.exe")) { throw "FileTools.exe was not produced" }
 
       - name: Build installer with NSIS

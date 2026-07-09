@@ -16,8 +16,8 @@ $env:PATH = "$(go env GOPATH)\bin;$env:PATH"
 
 Write-Host "Packaging FileTools.exe..."
 $env:CGO_ENABLED = "1"
-go build -ldflags "-H windowsgui" -o build/FileTools-raw.exe ./cmd/filetools
-fyne package --os windows --executable build/FileTools-raw.exe --name FileTools --icon build/appicon.png --release
+$icon = Join-Path (Get-Location) "build\appicon.png"
+fyne package --os windows --src ./cmd/filetools --icon "$icon" --name FileTools --app-id ai.filetools.desktop --release
 if (-not (Test-Path "FileTools.exe")) { throw "FileTools.exe was not produced" }
 
 $makensis = "C:\Program Files (x86)\NSIS\makensis.exe"
